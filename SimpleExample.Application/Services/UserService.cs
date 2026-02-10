@@ -26,8 +26,15 @@ public class UserService : IUserService
     }
 
     public async Task<UserDto> CreateAsync(CreateUserDto createUserDto)
-{
-    // Konstruktori validoi automaattisesti!
+    {
+    // APPLICATION LAYER VALIDOINTI: Tarkista duplikaatti
+    User? existingUser = await _userRepository.GetByEmailAsync(createUserDto.Email);
+    if (existingUser != null)
+    {
+        throw new InvalidOperationException($"Käyttäjä sähköpostilla {createUserDto.Email} on jo olemassa");
+    }
+
+    // DOMAIN LAYER VALIDOINTI: Konstruktori validoi automaattisesti
     User user = new User(
         createUserDto.FirstName,
         createUserDto.LastName,
@@ -36,7 +43,7 @@ public class UserService : IUserService
 
     User createdUser = await _userRepository.AddAsync(user);
     return MapToDto(createdUser);
-}
+    }
 
 public async Task<UserDto?> UpdateAsync(Guid id, UpdateUserDto updateUserDto)
 {

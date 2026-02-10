@@ -45,19 +45,24 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<UserDto>> Create([FromBody] CreateUserDto createUserDto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-        try
-        {
-            UserDto user = await _userService.CreateAsync(createUserDto);
-            return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+    if (!ModelState.IsValid)
+    {
+        return BadRequest(ModelState);
+    }
+
+    try
+    {
+        UserDto user = await _userService.CreateAsync(createUserDto);
+        return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+    }
+    catch (ArgumentException ex)
+    {
+        return BadRequest(new { message = ex.Message });
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Conflict(new { message = ex.Message }); // 409 Conflict
+    }
     }
 
     /// <summary>
