@@ -3,6 +3,7 @@ using FluentValidation;
 using SimpleExample.Domain.Entities;
 using SimpleExample.Application.DTOs;
 using Xunit;
+using FluentValidation.TestHelper;
 
 namespace SimpleExample.Tests.Validators;
 
@@ -20,12 +21,14 @@ public class ValidatorTests
   }
 
   [Fact]
-  public void Should_Have_Error_When_FirstName_Is_Empty()
-  {
+public void Should_Have_Error_When_FirstName_Is_Empty()
+{
     CreateUserDto dto = new CreateUserDto { FirstName = "", LastName = "Meikäläinen", Email = "test@test.com" };
-    var result = _validator.Validate(dto);
-    result.IsValid.Should().BeFalse();
-    result.Errors.Should().Contain(f => f.PropertyName == "FirstName" && f.ErrorMessage == "Etunimi on pakollinen");
-  }
+    var result = _validator.TestValidate(dto);
+    
+    // VÄÄRÄ ODOTUS - testi epäonnistuu!
+    result.ShouldNotHaveAnyValidationErrors();
+
+}
 }
 
