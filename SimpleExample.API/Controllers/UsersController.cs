@@ -49,9 +49,15 @@ public class UsersController : ControllerBase
         {
             return BadRequest(ModelState);
         }
-
-        UserDto user = await _userService.CreateAsync(createUserDto);
-        return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+        try
+        {
+            UserDto user = await _userService.CreateAsync(createUserDto);
+            return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     /// <summary>
@@ -64,13 +70,19 @@ public class UsersController : ControllerBase
         {
             return BadRequest(ModelState);
         }
-
-        UserDto? user = await _userService.UpdateAsync(id, updateUserDto);
-        if (user == null)
+        try
         {
-            return NotFound(new { message = $"User with ID {id} not found" });
+            UserDto? user = await _userService.UpdateAsync(id, updateUserDto);
+            if (user == null)
+            {
+                return NotFound(new { message = $"User with ID {id} not found" });
+            }
+            return Ok(user);
         }
-        return Ok(user);
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     /// <summary>

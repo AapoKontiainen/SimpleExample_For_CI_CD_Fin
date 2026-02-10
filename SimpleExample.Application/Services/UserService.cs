@@ -26,34 +26,33 @@ public class UserService : IUserService
     }
 
     public async Task<UserDto> CreateAsync(CreateUserDto createUserDto)
-    {
-        User user = new User
-        {
-            FirstName = createUserDto.FirstName,
-            LastName = createUserDto.LastName,
-            Email = createUserDto.Email
-        };
+{
+    // Konstruktori validoi automaattisesti!
+    User user = new User(
+        createUserDto.FirstName,
+        createUserDto.LastName,
+        createUserDto.Email
+    );
 
-        User createdUser = await _userRepository.AddAsync(user);
-        return MapToDto(createdUser);
+    User createdUser = await _userRepository.AddAsync(user);
+    return MapToDto(createdUser);
+}
+
+public async Task<UserDto?> UpdateAsync(Guid id, UpdateUserDto updateUserDto)
+{
+    User? user = await _userRepository.GetByIdAsync(id);
+    if (user == null)
+    {
+        return null;
     }
 
-    public async Task<UserDto?> UpdateAsync(Guid id, UpdateUserDto updateUserDto)
-    {
-        User? user = await _userRepository.GetByIdAsync(id);
-        if (user == null)
-        {
-            return null;
-        }
+    // UpdateBasicInfo ja UpdateEmail validoivat automaattisesti!
+    user.UpdateBasicInfo(updateUserDto.FirstName, updateUserDto.LastName);
+    user.UpdateEmail(updateUserDto.Email);
 
-        user.FirstName = updateUserDto.FirstName;
-        user.LastName = updateUserDto.LastName;
-        user.Email = updateUserDto.Email;
-
-        User updatedUser = await _userRepository.UpdateAsync(user);
-        return MapToDto(updatedUser);
-    }
-
+    User updatedUser = await _userRepository.UpdateAsync(user);
+    return MapToDto(updatedUser);
+}
     public async Task<bool> DeleteAsync(Guid id)
     {
         bool exists = await _userRepository.ExistsAsync(id);
